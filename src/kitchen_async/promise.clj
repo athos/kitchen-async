@@ -3,11 +3,13 @@
   (:require [clojure.core :as cc]))
 
 (defmacro promise [[resolve reject] & body]
-  (cc/let [resolve (or resolve '&resolve)
-           reject (or reject '&reject)]
+  (cc/let [bindings (cond-> []
+                      resolve (conj resolve '&resolve)
+                      reject (conj reject '&reject))]
     `(js/Promise.
-       (fn [~resolve ~reject]
-         ~@body))))
+       (fn [~'&resolve ~'&reject]
+         (cc/let ~bindings
+           ~@body)))))
 
 (defmacro resolved [x]
   `(~'&resolve ~x))
