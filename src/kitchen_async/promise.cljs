@@ -38,3 +38,11 @@
 
 (defn ->promise [x]
   (->promise* x))
+
+(defn callback->promise [f & args]
+  (p/promise [resolve reject]
+    (letfn [(callback [err val]
+              (if err
+                (reject err)
+                (resolve val)))]
+      (apply f (concat args [callback])))))
