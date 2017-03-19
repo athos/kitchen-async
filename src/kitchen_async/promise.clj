@@ -22,7 +22,7 @@
   ((reduce (fn [f [name expr]]
              (cc/let [p (f expr)]
                (fn [e]
-                 `(then ~p (fn [~name] ~e)))))
+                 `(then ~p (fn [~name] (->promise ~e))))))
            identity
            (partition 2 bindings))
    `(do ~@body)))

@@ -1,7 +1,8 @@
 (ns kitchen-async.promise
   (:require-macros [kitchen-async.promise :as p]
                    [cljs.core.async.macros :refer [go]])
-  (:require [clojure.core.async :as a]))
+  (:require [clojure.core.async :as a]
+            [clojure.core.async.impl.channels :refer [ManyToManyChannel]]))
 
 (defn resolve [x]
   (js/Promise.resolve x))
@@ -15,11 +16,25 @@
 (defn catch* [p f]
   (.catch p f))
 
-(defn ->chan [p]
-  (let [ch (a/chan)]
-    (then p #(a/put! ch %))
-    ch))
+(defprotocol Promisable
+  (->promise* [this]))
 
-(defn <-chan [ch]
-  (p/promise []
-    (go (p/resolved (a/<! ch)))))
+(extend-protocol Promisable
+  js/Promise
+  (->promise* [p] p)
+
+  ManyToManyChannel
+  (->promise* [c]
+    (p/promise [resolve reject]
+      (go
+        (let [x (a/<! c)]
+          (if (instance? js/Error x)
+            (reject x)
+            (resolve x))))))
+
+  default
+  (->promise* [x]
+    (resolve x)))
+
+(defn ->promise [x]
+  (->promise* x))
