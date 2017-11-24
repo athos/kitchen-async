@@ -1,7 +1,7 @@
 (ns kitchen-async.promise
   (:refer-clojure :exclude [promise let])
   (:require [clojure.core :as cc]
-            [clojure.spec :as s]))
+            [clojure.spec.alpha :as s]))
 
 (defmacro promise [[resolve reject] & body]
   (cc/let [bindings (cond-> []
