@@ -1,4 +1,5 @@
 (ns kitchen-async.promise
+  (:refer-clojure :exclude [resolve])
   (:require-macros [kitchen-async.promise :as p]
                    [cljs.core.async.macros :refer [go]])
   (:require [clojure.core.async :as a]
