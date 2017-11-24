@@ -7,7 +7,7 @@
   (cc/let [bindings (cond-> []
                       resolve (conj resolve '&resolve)
                       reject (conj reject '&reject))]
-    `(js/Promise.
+    `(goog.Promise.
        (fn [~'&resolve ~'&reject]
          (cc/let ~bindings
            ~@body)))))

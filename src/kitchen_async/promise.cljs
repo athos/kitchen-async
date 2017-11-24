@@ -3,13 +3,15 @@
   (:require-macros [kitchen-async.promise :as p]
                    [cljs.core.async.macros :refer [go]])
   (:require [clojure.core.async :as a]
-            [clojure.core.async.impl.channels :refer [ManyToManyChannel]]))
+            [clojure.core.async.impl.channels :refer [ManyToManyChannel]]
+            [goog.Promise :as Promise])
+  (:import goog.Promise))
 
 (defn resolve [x]
-  (js/Promise.resolve x))
+  (Promise.resolve x))
 
 (defn reject [x]
-  (js/Promise.reject x))
+  (Promise.reject x))
 
 (defn then [p f]
   (.then p f))
@@ -21,7 +23,7 @@
   (->promise* [this]))
 
 (extend-protocol Promisable
-  js/Promise
+  Promise
   (->promise* [p] p)
 
   ManyToManyChannel
