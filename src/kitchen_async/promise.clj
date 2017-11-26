@@ -19,13 +19,12 @@
   `(~'&reject ~x))
 
 (defmacro let [bindings & body]
-  ((reduce (fn [f [name expr]]
-             (cc/let [p (f expr)]
-               (fn [e]
-                 `(then ~p (fn [~name] (->promise ~e))))))
-           identity
-           (partition 2 bindings))
-   `(do ~@body)))
+  (letfn [(rec [[name init & bindings] body]
+            (if-not name
+              `(do ~@body)
+              `(then (->promise ~init)
+                     (fn [~name] ~(rec bindings body)))))]
+    `(->promise ~(rec bindings body))))
 
 (defmacro plet [[name expr] & body]
   `(then (js/Promise.all ~expr)
