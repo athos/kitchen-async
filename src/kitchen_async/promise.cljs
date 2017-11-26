@@ -5,7 +5,8 @@
   (:require [clojure.core.async :as a]
             [clojure.core.async.impl.channels :refer [ManyToManyChannel]]
             [goog.Promise :as Promise])
-  (:import goog.Promise))
+  (:import goog.async.Deferred
+           goog.Promise))
 
 (defn resolve [x]
   (Promise.resolve x))
@@ -25,6 +26,11 @@
 (extend-protocol Promisable
   Promise
   (->promise* [p] p)
+
+  Deferred
+  (->promise* [d]
+    (p/promise [resolve reject]
+      (.addCallbacks d resolve reject)))
 
   ManyToManyChannel
   (->promise* [c]
