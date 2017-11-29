@@ -22,8 +22,7 @@
   (letfn [(rec [[name init & bindings] body]
             (if-not name
               `(do ~@body)
-              `(then (->promise ~init)
-                     (fn [~name] ~(rec bindings body)))))]
+              `(then ~init (fn [~name] ~(rec bindings body)))))]
     `(->promise ~(rec bindings body))))
 
 (defmacro plet [bindings & body]
@@ -53,7 +52,7 @@
 (defmacro -> [x & forms]
   (if forms
     (cc/let [[form & forms] forms]
-      `(-> (then (->promise ~x)
+      `(-> (then ~x
                  ~(if (seq? form)
                     `(fn [v#] (~(first form) v# ~@(rest form)))
                     form))
@@ -63,7 +62,7 @@
 (defmacro ->> [x & forms]
   (if forms
     (cc/let [[form & forms] forms]
-      `(->> (then (->promise ~x)
+      `(->> (then ~x
                   ~(if (seq? form)
                      `(fn [v#] (~@form v#))
                      form))
