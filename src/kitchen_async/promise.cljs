@@ -17,10 +17,10 @@
 (declare ->promise)
 
 (defn then [p f]
-  (.then p f))
+  (.then (->promise p) f))
 
 (defn catch* [p f]
-  (.catch p f))
+  (.catch (->promise p) f))
 
 (defn all [ps]
   (Promise.all (clj->js (map ->promise ps))))
