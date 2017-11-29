@@ -14,11 +14,16 @@
 (defn reject [x]
   (Promise.reject x))
 
+(declare ->promise)
+
 (defn then [p f]
   (.then p f))
 
 (defn catch* [p f]
   (.catch p f))
+
+(defn all [ps]
+  (Promise.all (clj->js (map ->promise ps))))
 
 (defprotocol Promisable
   (->promise* [this]))
