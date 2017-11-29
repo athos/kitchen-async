@@ -1,5 +1,5 @@
 (ns kitchen-async.promise
-  (:refer-clojure :exclude [promise let -> ->>])
+  (:refer-clojure :exclude [promise let loop -> ->>])
   (:require [clojure.core :as cc]
             [clojure.spec.alpha :as s]))
 
@@ -32,6 +32,23 @@
            inits (mapv (fn [[_ e]] `(->promise ~e)) pairs)]
     `(then (goog.Promise.all (cc/clj->js ~inits))
            (fn [~names] ~@body))))
+
+(def ^:private LOOP_FN_NAME (gensym 'loop-fn))
+
+(defmacro loop [bindings & body]
+  (cc/let [pairs (partition 2 2 bindings)
+           names (mapv first pairs)
+           inits (mapv second pairs)
+           gensyms (map (fn [_] (gensym)) names)]
+    `(letfn [(~LOOP_FN_NAME [~@gensyms]
+               (plet [~@(interleave names gensyms)]
+                 ~@body))]
+       (~LOOP_FN_NAME ~@inits))))
+
+(defmacro recur [& args]
+  (cc/let [gensyms (mapv (fn [_] (gensym)) args)]
+    `(plet [~gensyms ~(vec args)]
+       (~LOOP_FN_NAME ~@gensyms))))
 
 (defmacro -> [x & forms]
   (if forms
