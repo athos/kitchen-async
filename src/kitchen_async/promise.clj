@@ -1,5 +1,5 @@
 (ns kitchen-async.promise
-  (:refer-clojure :exclude [promise let])
+  (:refer-clojure :exclude [promise let -> ->>])
   (:require [clojure.core :as cc]
             [clojure.spec.alpha :as s]))
 
@@ -29,6 +29,26 @@
 (defmacro plet [[name expr] & body]
   `(then (js/Promise.all ~expr)
          (fn [~name]~@body)))
+
+(defmacro -> [x & forms]
+  (if forms
+    (cc/let [[form & forms] forms]
+      `(-> (then (->promise ~x)
+                 ~(if (seq? form)
+                    `(fn [v#] (~(first form) v# ~@(rest form)))
+                    form))
+           ~@forms))
+    x))
+
+(defmacro ->> [x & forms]
+  (if forms
+    (cc/let [[form & forms] forms]
+      `(->> (then (->promise ~x)
+                  ~(if (seq? form)
+                     `(fn [v#] (~@form v#))
+                     form))
+            ~@forms))
+    x))
 
 (declare catch)
 
