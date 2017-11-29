@@ -26,9 +26,12 @@
                      (fn [~name] ~(rec bindings body)))))]
     `(->promise ~(rec bindings body))))
 
-(defmacro plet [[name expr] & body]
-  `(then (js/Promise.all ~expr)
-         (fn [~name]~@body)))
+(defmacro plet [bindings & body]
+  (cc/let [pairs (partition 2 2 bindings)
+           names (mapv first pairs)
+           inits (mapv (fn [[_ e]] `(->promise ~e)) pairs)]
+    `(then (goog.Promise.all (cc/clj->js ~inits))
+           (fn [~names] ~@body))))
 
 (defmacro -> [x & forms]
   (if forms
