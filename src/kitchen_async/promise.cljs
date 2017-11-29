@@ -25,6 +25,15 @@
 (defn all [ps]
   (Promise.all (clj->js (map ->promise ps))))
 
+(defn race [ps]
+  (Promise.race (clj->js (map ->promise ps))))
+
+(defn timeout
+  ([ms] (timeout ms nil))
+  ([ms v]
+   (p/promise [resolve]
+     (js/setTimeout #(resolve v) ms))))
+
 (defprotocol Promisable
   (->promise* [this]))
 
