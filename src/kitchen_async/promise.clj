@@ -1,5 +1,5 @@
 (ns kitchen-async.promise
-  (:refer-clojure :exclude [promise let loop -> ->>])
+  (:refer-clojure :exclude [promise let loop while -> ->>])
   (:require [clojure.core :as cc]
             [clojure.spec.alpha :as s]))
 
@@ -48,6 +48,12 @@
   (cc/let [gensyms (mapv (fn [_] (gensym)) args)]
     `(plet [~gensyms ~(vec args)]
        (~LOOP_FN_NAME ~@gensyms))))
+
+(defmacro while [cond & body]
+  `(loop [v# ~cond]
+     (when v#
+       (let [_# (do ~@body)]
+         (kitchen-async.promise/recur ~cond)))))
 
 (defmacro -> [x & forms]
   (if forms
