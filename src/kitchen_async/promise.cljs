@@ -20,7 +20,8 @@
   (.then (->promise p) f))
 
 (defn catch* [p f]
-  (.catch (->promise p) f))
+  ;; use .then rather than .catch since goog.Promise doesn't have it
+  (.then (->promise p) nil f))
 
 (defn all [ps]
   (Promise.all (clj->js (map ->promise ps))))
