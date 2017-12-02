@@ -27,7 +27,7 @@
                {:id "node-test"
                 :source-paths ["src" "test"]
                 :compiler {:output-to "target/node-test/kitchen_async.js"
-                           :output-dir "target/node-test/kitchen_async.js"
+                           :output-dir "target/node-test"
                            :main kitchen-async.runner
                            :target :nodejs
                            :optimizations :none}}]}
