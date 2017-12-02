@@ -16,7 +16,6 @@
                 :source-paths ["src"]
                 :compiler {:output-to "target/dev/kitchen_async.js"
                            :output-dir "target/dev"
-                           :language-in :es5
                            :optimizations :whitespace
                            :pretty-print true}}
                {:id "test"
@@ -24,14 +23,12 @@
                 :compiler {:output-to "target/test/kitchen_async.js"
                            :output-dir "target/test"
                            :main kitchen-async.runner
-                           :language-in :es5
                            :optimizations :none}}
                {:id "node-test"
                 :source-paths ["src" "test"]
                 :compiler {:output-to "target/node-test/kitchen_async.js"
                            :output-dir "target/node-test/kitchen_async.js"
                            :main kitchen-async.runner
-                           :language-in :es5
                            :target :nodejs
                            :optimizations :none}}]}
 
