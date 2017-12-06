@@ -16,8 +16,13 @@
 
 (declare ->promise)
 
-(defn then [p f]
-  (.then (->promise p) f))
+(defn then
+  ([p f]
+   (.then (->promise p) f))
+  ([p f g]
+   (then (then p f) g))
+  ([p f g & more]
+   (reduce #(then %1 %2) (then p f g) more)))
 
 (defn catch* [p f]
   ;; use .then rather than .catch since goog.Promise doesn't have it
