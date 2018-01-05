@@ -4,15 +4,26 @@
                    [cljs.core.async.macros :refer [go]])
   (:require [clojure.core.async :as a]
             [clojure.core.async.impl.channels :refer [ManyToManyChannel]]
-            [goog.Promise :as Promise])
-  (:import goog.async.Deferred
-           goog.Promise))
+            goog.Promise)
+  (:import goog.async.Deferred))
+
+(def ^:private %promise-impl
+  (let [init (if (exists? js/Promise)
+               js/Promise
+               goog.Promise)]
+    (atom init)))
+
+(defn promise-impl []
+  @%promise-impl)
+
+(defn set-promise-impl! [impl]
+  (reset! %promise-impl impl))
 
 (defn resolve [x]
-  (Promise.resolve x))
+  (.resolve (promise-impl) x))
 
 (defn reject [x]
-  (Promise.reject x))
+  (.reject (promise-impl) x))
 
 (declare ->promise)
 
@@ -29,10 +40,10 @@
   (.then (->promise p) nil f))
 
 (defn all [ps]
-  (Promise.all (clj->js (map ->promise ps))))
+  (.all (promise-impl) (clj->js (map ->promise ps))))
 
 (defn race [ps]
-  (Promise.race (clj->js (map ->promise ps))))
+  (.race (promise-impl) (clj->js (map ->promise ps))))
 
 (defn timeout
   ([ms] (timeout ms nil))
@@ -44,7 +55,7 @@
   (->promise* [this]))
 
 (extend-protocol Promisable
-  Promise
+  goog.Promise
   (->promise* [p] p)
 
   Deferred
@@ -64,6 +75,11 @@
   default
   (->promise* [x]
     (resolve x)))
+
+(when (exists? js/Promise)
+  (extend-type js/Promise
+    Promisable
+    (->promise* [p] p)))
 
 (defn ->promise [x]
   (->promise* x))

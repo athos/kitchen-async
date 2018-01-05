@@ -1,8 +1,8 @@
 (ns kitchen-async.promise-test
   (:require [clojure.core.async :as a]
             [clojure.test :refer [deftest is async]]
-            [kitchen-async.promise :as p :include-macros true])
-  (:import goog.Promise))
+            goog.Promise
+            [kitchen-async.promise :as p :include-macros true]))
 
 (deftest promise-resolve-test
   (async done
@@ -59,7 +59,7 @@
 (deftest ->promise-from-number-test
   (async done
     (let [p (p/->promise 42)]
-      (is (instance? Promise p))
+      (is (instance? (p/promise-impl) p))
       (.then p (fn [x]
                  (is (= 42 x))
                  (done))))))
@@ -143,7 +143,7 @@
   (async done
     (let [p (p/let [x (p/resolve 41)]
               (+ x 1))]
-      (is (instance? Promise p))
+      (is (instance? (p/promise-impl) p))
       (p/then p (fn [x]
                   (is (= 42 x))
                   (done))))))

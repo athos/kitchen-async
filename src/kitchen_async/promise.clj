@@ -7,10 +7,11 @@
   (cc/let [bindings (cond-> []
                       resolve (conj resolve '&resolve)
                       reject (conj reject '&reject))]
-    `(goog.Promise.
-       (fn [~'&resolve ~'&reject]
-         (cc/let ~bindings
-           ~@body)))))
+    `(cc/let [p# (promise-impl)]
+       (new p#
+         (fn [~'&resolve ~'&reject]
+           (cc/let ~bindings
+             ~@body))))))
 
 (defmacro resolved [x]
   `(~'&resolve ~x))
@@ -29,7 +30,7 @@
   (cc/let [pairs (partition 2 2 bindings)
            names (mapv first pairs)
            inits (mapv (fn [[_ e]] `(->promise ~e)) pairs)]
-    `(then (goog.Promise.all (cc/clj->js ~inits))
+    `(then (.all (promise-impl) (cc/clj->js ~inits))
            (fn [~names] ~@body))))
 
 (def ^:private LOOP_FN_NAME (gensym 'loop-fn))
