@@ -38,24 +38,6 @@
                (is (= msg (ex-message e)))
                (done))))))
 
-(deftest resolved-test
-  (async done
-    (.then (p/promise []
-             (p/resolved 42))
-           (fn [x]
-             (is (= x 42))
-             (done)))))
-
-(deftest rejected-test
-  (async done
-    (let [msg "something wrong has happened!!"]
-      (.then (p/promise []
-               (p/rejected (ex-info msg {})))
-             nil
-             (fn [e]
-               (is (= msg (ex-message e)))
-               (done))))))
-
 (deftest ->promise-from-number-test
   (async done
     (let [p (p/->promise 42)]

@@ -4,20 +4,13 @@
             [clojure.spec.alpha :as s]))
 
 (defmacro promise [[resolve reject] & body]
-  (cc/let [bindings (cond-> []
-                      resolve (conj resolve '&resolve)
-                      reject (conj reject '&reject))]
+  (cc/let [params (cond-> []
+                    resolve (conj resolve)
+                    reject (conj reject))]
     `(cc/let [p# (promise-impl)]
        (new p#
-         (fn [~'&resolve ~'&reject]
-           (cc/let ~bindings
-             ~@body))))))
-
-(defmacro resolved [x]
-  `(~'&resolve ~x))
-
-(defmacro rejected [x]
-  `(~'&reject ~x))
+         (fn ~params
+           ~@body)))))
 
 (defmacro let [bindings & body]
   (letfn [(rec [[name init & bindings] body]
