@@ -16,20 +16,42 @@
                 :source-paths ["src"]
                 :compiler {:output-to "target/dev/kitchen_async.js"
                            :output-dir "target/dev"
-                           :optimizations :whitespace
+                           :optimizations :none
                            :pretty-print true}}
                {:id "test"
                 :source-paths ["src" "test"]
                 :compiler {:output-to "target/test/kitchen_async.js"
                            :output-dir "target/test"
                            :main kitchen-async.runner
-                           :optimizations :none}}
+                           :optimizations :whitespace}}
+               {:id "min-test"
+                :source-paths ["src" "test"]
+                :compiler {:output-to "target/min-test/kitchen_async.js"
+                           :output-dir "target/min-test"
+                           :main kitchen-async.runner
+                           :optimizations :advanced}}
                {:id "node-test"
                 :source-paths ["src" "test"]
                 :compiler {:output-to "target/node-test/kitchen_async.js"
                            :output-dir "target/node-test"
                            :main kitchen-async.runner
                            :target :nodejs
-                           :optimizations :none}}]}
+                           :optimizations :none}}
+               {:id "node-min-test"
+                :source-paths ["src" "test"]
+                :compiler {:output-to "target/node-min-test/kitchen_async.js"
+                           :output-dir "target/node-min-test"
+                           :main kitchen-async.runner
+                           :target :nodejs
+                           :optimizations :advanced}}]}
 
-  :profiles {:dev {:dependencies [[doo "0.1.8"]]}})
+  :profiles {:dev {:dependencies [[doo "0.1.8"]]}}
+
+  :aliases {"test-all" ["do" ["test"] ["test-min"]]
+            "test" ["do"
+                    ["doo" "phantom" "test" "once"]
+                    ["doo" "node" "node-test" "once"]]
+            "test-min" ["do"
+                        ["doo" "phantom" "min-test" "once"]
+                        ["doo" "node" "node-min-test" "once"]]}
+  )
