@@ -1,0 +1,35 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: jesiio/web:0.1
+
+    working_directory: ~/repo
+
+    environment:
+      LEIN_ROOT: "true"
+      JVM_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          key: v1-dependencies-{{ checksum "project.clj" }}
+
+      - run: lein deps
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "project.clj" }}
+
+      - run:
+          name: test
+          command: lein test-all
+
+      # - run:
+      #     name: code-coverage
+      #     command: |
+      #       CLOVERAGE_VERSION=1.0.9 lein cloverage --codecov
+      #       bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
