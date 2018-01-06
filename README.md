@@ -1,4 +1,5 @@
 # kitchen-async
+[![CircleCI](https://circleci.com/gh/athos/kitchen-async.svg?style=shield)](https://circleci.com/gh/athos/kitchen-async)
 
 Yet another async library for ClojureScript aiming for seamless use of Promises and core.async channels with ease
 
