@@ -23,7 +23,7 @@
   (cc/let [pairs (partition 2 2 bindings)
            names (mapv first pairs)
            inits (mapv (fn [[_ e]] `(->promise ~e)) pairs)]
-    `(then (.all (promise-impl) (cc/clj->js ~inits))
+    `(then (goog.Promise.all (cc/clj->js ~inits))
            (fn [~names] ~@body))))
 
 (def ^:private LOOP_FN_NAME (gensym 'loop-fn))

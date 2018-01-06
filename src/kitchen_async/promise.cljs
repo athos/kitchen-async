@@ -20,10 +20,12 @@
   (reset! %promise-impl impl))
 
 (defn resolve [x]
-  (.resolve (promise-impl) x))
+  (let [p (promise-impl)]
+    (new p (fn [resolve] (resolve x)))))
 
 (defn reject [x]
-  (.reject (promise-impl) x))
+  (let [p (promise-impl)]
+    (new p (fn [_ reject] (reject x)))))
 
 (declare ->promise)
 
@@ -40,10 +42,10 @@
   (.then (->promise p) nil f))
 
 (defn all [ps]
-  (.all (promise-impl) (clj->js (map ->promise ps))))
+  (goog.Promise.all (clj->js (map ->promise ps))))
 
 (defn race [ps]
-  (.race (promise-impl) (clj->js (map ->promise ps))))
+  (goog.Promise.race (clj->js (map ->promise ps))))
 
 (defn timeout
   ([ms] (timeout ms nil))
