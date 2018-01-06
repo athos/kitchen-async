@@ -4,8 +4,7 @@
                    [cljs.core.async.macros :refer [go]])
   (:require [clojure.core.async :as a]
             [clojure.core.async.impl.channels :refer [ManyToManyChannel]]
-            goog.Promise)
-  (:import goog.async.Deferred))
+            goog.Promise))
 
 (def ^:private %promise-impl
   (let [init (if (exists? js/Promise)
@@ -59,11 +58,6 @@
 (extend-protocol Promisable
   goog.Promise
   (->promise* [p] p)
-
-  Deferred
-  (->promise* [d]
-    (p/promise [resolve reject]
-      (.addCallbacks d resolve reject)))
 
   ManyToManyChannel
   (->promise* [c]
