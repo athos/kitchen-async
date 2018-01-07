@@ -70,8 +70,6 @@
             ~@forms))
     x))
 
-(declare catch)
-
 (defmacro try [& body]
   (cc/let [conformed (s/conform ::specs/try-args body)
            try-body (s/unform ::specs/try-body (:try-body conformed))]
@@ -82,3 +80,6 @@
                               (reject ~error-name)))))
             `(do ~@try-body)
             (:catch-clauses conformed))))
+
+(defmacro catch [classname name & expr*]
+  (throw (ex-info "Can't call kitchen-async.promise/catch outside of kitchen-async.promise/try" {})))
