@@ -73,20 +73,12 @@
 (declare catch)
 
 (defmacro try [& body]
-  (binding [specs/*env* &env]
-    (cc/let [result (s/conform ::specs/try-args body)]
-      (if (= result ::s/invalid)
-        (cc/let [ed (s/explain-data ::specs/try-args body)
-                 msg (with-out-str
-                       (println "Call to" 'kitchen-async.promise/try "did not conform to spec:")
-                       (s/explain-out ed))]
-          (throw (ex-info msg ed)))
-        (cc/let [{:keys [try-body catch-clauses]} result
-                 try-body (s/unform ::specs/try-body try-body)]
-          (reduce (fn [p {:keys [error-type error-name catch-body]}]
-                    `(catch* ~p (fn [~error-name]
-                                  (if (instance? ~error-type ~error-name)
-                                    (do ~@catch-body)
-                                    (reject ~error-name)))))
-                  `(do ~@try-body)
-                  catch-clauses))))))
+  (cc/let [conformed (s/conform ::specs/try-args body)
+           try-body (s/unform ::specs/try-body (:try-body conformed))]
+    (reduce (fn [p {:keys [error-type error-name catch-body]}]
+              `(catch* ~p (fn [~error-name]
+                            (if (instance? ~error-type ~error-name)
+                              (do ~@catch-body)
+                              (reject ~error-name)))))
+            `(do ~@try-body)
+            (:catch-clauses conformed))))
