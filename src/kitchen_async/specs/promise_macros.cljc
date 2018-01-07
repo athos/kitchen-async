@@ -1,23 +1,16 @@
 (ns kitchen-async.specs.promise-macros
-  (:require [cljs.env :as env]
-            [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [kitchen-async.utils :as utils]))
 
-(def ^:private ^:dynamic *env* nil)
-
-(defn- fixup-alias [env sym]
-  (or (when-let [ns-name (some-> (namespace sym) symbol)]
-        (when-let [ns (or (get-in env [:ns :require-macros ns-name])
-                          (get-in env [:ns :require ns-name]))]
-          (symbol (name ns) (name sym))))
-      sym))
+(defn catch? [sym]
+  (or (= sym 'catch)
+      (= (utils/fixup-alias sym) 'kitchen-async.promise/catch)))
 
 (s/def ::error-type symbol?)
 (s/def ::error-name simple-symbol?)
 (s/def ::catch-op
-  (s/and symbol?
-         (fn [sym]
-           (when-let [sym (fixup-alias *env* sym)]
-             (or (= sym 'catch) (= sym 'kitchen-async.promise/catch))))))
+  (s/and symbol? catch?))
+
 (s/def ::non-catch-expr
   (s/and seq?
          (s/cat :op #(not (s/valid? ::catch-op %))
