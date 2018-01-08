@@ -72,14 +72,20 @@
 
 (defmacro try [& body]
   (cc/let [conformed (s/conform ::specs/try-args body)
-           try-body (s/unform ::specs/try-body (:try-body conformed))]
-    (reduce (fn [p {:keys [error-type error-name catch-body]}]
-              `(catch* ~p (fn [~error-name]
-                            (if (instance? ~error-type ~error-name)
-                              (do ~@catch-body)
-                              (reject ~error-name)))))
-            `(do ~@try-body)
-            (:catch-clauses conformed))))
+           try-body (s/unform ::specs/try-body (:try-body conformed))
+           err (gensym 'err)]
+    (letfn [(emit-catch [{:keys [error-type error-name catch-body]}]
+              [(if (= (first error-type) :default)
+                 :else
+                 `(instance? ~(second error-type) ~err))
+               `(cc/let [~error-name ~err] ~@catch-body)])]
+      `(catch* (try
+                 ~@try-body
+                 (catch :default e#
+                   (reject e#)))
+               (fn [~err]
+                 (cond ~@(mapcat emit-catch (:catch-clauses conformed))
+                       :else (reject ~err)))))))
 
 (defmacro catch [classname name & expr*]
   (throw (ex-info "Can't call kitchen-async.promise/catch outside of kitchen-async.promise/try" {})))

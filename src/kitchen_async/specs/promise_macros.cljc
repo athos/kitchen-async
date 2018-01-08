@@ -6,7 +6,9 @@
   (or (= sym 'catch)
       (= (utils/fixup-alias sym) 'kitchen-async.promise/catch)))
 
-(s/def ::error-type symbol?)
+(s/def ::error-type
+  (s/or :type-name symbol?
+        :default #{:default}))
 (s/def ::error-name simple-symbol?)
 (s/def ::catch-op
   (s/and symbol? catch?))
