@@ -79,13 +79,20 @@
                  :else
                  `(instance? ~(second error-type) ~err))
                `(cc/let [~error-name ~err] ~@catch-body)])]
-      `(catch* (try
-                 ~@try-body
-                 (catch :default e#
-                   (reject e#)))
-               (fn [~err]
-                 (cond ~@(mapcat emit-catch (:catch-clauses conformed))
-                       :else (reject ~err)))))))
+      `(cc/-> (try
+                ~@try-body
+                (catch :default e#
+                  (reject e#)))
+              (catch*
+                (fn [~err]
+                  (cond ~@(mapcat emit-catch (:catch-clauses conformed))
+                        :else (reject ~err))))
+              ~@(when-let [clause (:finally-clause conformed)]
+                  `((then (fn [_#] ~@(:finally-body clause)))
+                    (catch* (fn [_#] ~@(:finally-body clause)))))))))
 
 (defmacro catch [classname name & expr*]
   (throw (ex-info "Can't call kitchen-async.promise/catch outside of kitchen-async.promise/try" {})))
+
+(defmacro finally [& expr*]
+  (throw (ex-info "Can't call kitchen-async.promise/finally outside of kitchen-async.promise/try" {})))
