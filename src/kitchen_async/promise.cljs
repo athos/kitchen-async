@@ -32,13 +32,10 @@
   ([p f]
    (.then (->promise p) f))
   ([p f g]
-   (then (then p f) g))
-  ([p f g & more]
-   (reduce #(then %1 %2) (then p f g) more)))
+   (.then (->promise p) f g)))
 
 (defn catch* [p f]
-  ;; use .then rather than .catch since goog.Promise doesn't have it
-  (.then (->promise p) nil f))
+  (then p nil f))
 
 (defn all [ps]
   (goog.Promise.all (clj->js (map ->promise ps))))

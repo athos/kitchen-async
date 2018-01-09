@@ -88,8 +88,8 @@
                   (cond ~@(mapcat emit-catch (:catch-clauses conformed))
                         :else (reject ~err))))
               ~@(when-let [clause (:finally-clause conformed)]
-                  `((then (fn [_#] ~@(:finally-body clause)))
-                    (catch* (fn [_#] ~@(:finally-body clause)))))))))
+                  `((then (fn [_#] ~@(:finally-body clause))
+                          (fn [_#] ~@(:finally-body clause)))))))))
 
 (defmacro catch [classname name & expr*]
   (throw (ex-info "Can't call kitchen-async.promise/catch outside of kitchen-async.promise/try" {})))

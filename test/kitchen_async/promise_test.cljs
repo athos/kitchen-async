@@ -62,15 +62,6 @@
               (is (= 42 x))
               (done)))))
 
-(deftest then-multiple-test
-  (async done
-    (p/then (p/resolve 40)
-            inc
-            inc
-            (fn [x]
-              (is (= 42 x))
-              (done)))))
-
 (deftest then-from-number-test
   (async done
     (p/then 42
