@@ -198,3 +198,66 @@
             (fn [x]
               (is (= 42 x))
               (done)))))
+
+(deftest try-success-test
+  (async done
+    (p/then (p/try 42)
+            (fn [x]
+              (is (= 42 x))
+              (done)))))
+
+(deftest try-fail-test
+  (async done
+    (let [msg "somthing wrong has happened!!"]
+      (p/catch* (p/try (throw (ex-info msg {})))
+                (fn [e]
+                  (is (= msg (ex-message e)))
+                  (done))))))
+
+(deftest try-catch-test
+  (async done
+    (let [msg "something wrong has happened!!"]
+      (p/try
+        (throw (js/RangeError. msg))
+        (p/catch ExceptionInfo e
+          (assert false "not reached"))
+        (p/catch :default e
+          (is (= (ex-message e) msg))
+          (done))))))
+
+(deftest try-finally-test
+  (async done
+    (p/then (p/try
+              (p/resolve 41)
+              (p/catch :default e
+                (assert false "not reached"))
+              (p/finally 42))
+            (fn [x]
+              (is (= 42 x))
+              (done)))))
+
+(deftest try-catch-finally-test
+  (async done
+    (let [v (volatile! 39)]
+      (p/then (p/try
+                (throw (ex-info "something wrong has happened!!" {}))
+                (p/catch :default e
+                  (vswap! v + 1))
+                (p/finally
+                  (vswap! v + 2)
+                  @v))
+              (fn [x]
+                (is (= 42 x))
+                (done))))))
+
+(deftest nested-try-catch-test
+  (async done
+    (let [msg "something wrong has happened!!"]
+      (p/try
+        (p/try
+          (throw (ex-info msg {}))
+          (p/catch js/RangeError e
+            (assert false "not reached")))
+        (p/catch :default e
+          (is (= msg (ex-message e)))
+          (done))))))
