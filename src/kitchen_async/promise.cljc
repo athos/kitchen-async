@@ -78,15 +78,20 @@
               [(if (= (first error-type) :default)
                  :else
                  `(instance? ~(second error-type) ~err))
-               `(cc/let [~error-name ~err] ~@catch-body)])]
+               `(cc/let [~error-name ~err] ~@catch-body)])
+            (emit-catches [clauses]
+              `((catch*
+                 (fn [~err]
+                   (cond ~@(mapcat emit-catch clauses)
+                         ~@(when-not (some #(= (:error-type %) :default)
+                                           clauses)
+                             `[:else (reject ~err)]))))))]
       `(cc/-> (try
                 ~@try-body
                 (catch :default e#
                   (reject e#)))
-              (catch*
-                (fn [~err]
-                  (cond ~@(mapcat emit-catch (:catch-clauses conformed))
-                        :else (reject ~err))))
+              ~@(when-let [clauses (:catch-clauses conformed)]
+                  (emit-catches clauses))
               ~@(when-let [clause (:finally-clause conformed)]
                   `((then (fn [_#] ~@(:finally-body clause))
                           (fn [_#] ~@(:finally-body clause)))))))))
