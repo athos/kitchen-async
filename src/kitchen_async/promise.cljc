@@ -19,10 +19,13 @@
      (catch :default e#
        (reject e#))))
 
-(defmacro ^:private do* [expr & exprs]
-  (if (empty? exprs)
-    expr
-    `(then ~expr (fn [_#] (do* ~@exprs)))))
+(defmacro ^:private do* [& exprs]
+  (when-not (empty? exprs)
+    (letfn [(rec [expr exprs]
+              (if (empty? exprs)
+                expr
+                `(then ~expr (fn [_#] ~(rec (first exprs) (rest exprs))))))]
+      (rec (first exprs) (rest exprs)))))
 
 (defmacro do [& body]
   (if (empty? body)
@@ -33,7 +36,7 @@
 (defmacro let [bindings & body]
   (letfn [(rec [[name init & bindings] body]
             (if-not name
-              `(do ~@body)
+              `(do* ~@body)
               `(then ~init (fn [~name] ~(rec bindings body)))))]
     `(with-error-handling
        (->promise ~(rec bindings body)))))
@@ -44,7 +47,7 @@
            inits (mapv (fn [[_ e]] `(->promise ~e)) pairs)]
     `(with-error-handling
        (then (goog.Promise.all (cc/clj->js ~inits))
-             (fn [~names] ~@body)))))
+             (fn [~names] (do* ~@body))))))
 
 (def ^:private LOOP_FN_NAME (gensym 'loop-fn))
 
@@ -67,7 +70,7 @@
 (defmacro while [cond & body]
   `(loop [v# ~cond]
      (when v#
-       (let [_# (do ~@body)]
+       (let [_# (do* ~@body)]
          (kitchen-async.promise/recur ~cond)))))
 
 (defmacro -> [x & forms]
@@ -100,7 +103,7 @@
               [(if (= (first error-type) :default)
                  :else
                  `(instance? ~(second error-type) ~err))
-               `(cc/let [~error-name ~err] ~@catch-body)])
+               `(cc/let [~error-name ~err] (do* ~@catch-body))])
             (emit-catches [clauses]
               `((catch*
                  (fn [~err]
@@ -112,8 +115,7 @@
               ~@(when-let [clauses (:catch-clauses conformed)]
                   (emit-catches clauses))
               ~@(when-let [clause (:finally-clause conformed)]
-                  `((then (fn [_#] ~@(:finally-body clause))
-                          (fn [_#] ~@(:finally-body clause)))))))))
+                  `((finally* (fn [_#] (do* ~@(:finally-body clause))))))))))
 
 (defmacro catch [classname name & expr*]
   (throw (ex-info "Can't call kitchen-async.promise/catch outside of kitchen-async.promise/try" {})))

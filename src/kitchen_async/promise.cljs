@@ -37,6 +37,9 @@
 (defn catch* [p f]
   (then p nil f))
 
+(defn finally* [p f]
+  (then p f f))
+
 (defn all [ps]
   (goog.Promise.all (clj->js (map ->promise ps))))
 
