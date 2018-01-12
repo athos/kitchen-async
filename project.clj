@@ -45,7 +45,8 @@
                            :target :nodejs
                            :optimizations :advanced}}]}
 
-  :profiles {:dev {:dependencies [[doo "0.1.8"]]}}
+  :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.2"]
+                                  [doo "0.1.8"]]}}
 
   :aliases {"test-all" ["do" ["test"] ["test-min"]]
             "test" ["do"
