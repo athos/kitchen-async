@@ -35,14 +35,16 @@
             (if-not name
               `(do ~@body)
               `(then ~init (fn [~name] ~(rec bindings body)))))]
-    `(->promise ~(rec bindings body))))
+    `(with-error-handling
+       (->promise ~(rec bindings body)))))
 
 (defmacro plet [bindings & body]
   (cc/let [pairs (partition 2 2 bindings)
            names (mapv first pairs)
            inits (mapv (fn [[_ e]] `(->promise ~e)) pairs)]
-    `(then (goog.Promise.all (cc/clj->js ~inits))
-           (fn [~names] ~@body))))
+    `(with-error-handling
+       (then (goog.Promise.all (cc/clj->js ~inits))
+             (fn [~names] ~@body)))))
 
 (def ^:private LOOP_FN_NAME (gensym 'loop-fn))
 
@@ -54,7 +56,8 @@
     `(letfn [(~LOOP_FN_NAME [~@gensyms]
                (plet [~@(interleave names gensyms)]
                  ~@body))]
-       (~LOOP_FN_NAME ~@inits))))
+       (with-error-handling
+         (~LOOP_FN_NAME ~@inits)))))
 
 (defmacro recur [& args]
   (cc/let [gensyms (mapv (fn [_] (gensym)) args)]
@@ -70,21 +73,23 @@
 (defmacro -> [x & forms]
   (if forms
     (cc/let [[form & forms] forms]
-      `(-> (then ~x
-                 ~(if (seq? form)
-                    `(fn [v#] (~(first form) v# ~@(rest form)))
-                    form))
-           ~@forms))
+      `(with-error-handling
+         (-> (then ~x
+                   ~(if (seq? form)
+                     `(fn [v#] (~(first form) v# ~@(rest form)))
+                     form))
+             ~@forms)))
     x))
 
 (defmacro ->> [x & forms]
   (if forms
     (cc/let [[form & forms] forms]
-      `(->> (then ~x
-                  ~(if (seq? form)
-                     `(fn [v#] (~@form v#))
-                     form))
-            ~@forms))
+      `(with-error-handling
+         (->> (then ~x
+                    ~(if (seq? form)
+                       `(fn [v#] (~@form v#))
+                       form))
+              ~@forms)))
     x))
 
 (defmacro try [& body]
@@ -103,10 +108,7 @@
                          ~@(when-not (some #(= (:error-type %) :default)
                                            clauses)
                              `[:else (reject ~err)]))))))]
-      `(cc/-> (try
-                ~@try-body
-                (catch :default e#
-                  (reject e#)))
+      `(cc/-> (~'kitchen-async.promise/do ~@try-body)
               ~@(when-let [clauses (:catch-clauses conformed)]
                   (emit-catches clauses))
               ~@(when-let [clause (:finally-clause conformed)]
