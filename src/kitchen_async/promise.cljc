@@ -1,5 +1,5 @@
 (ns kitchen-async.promise
-  (:refer-clojure :exclude [promise let loop while -> ->>])
+  (:refer-clojure :exclude [promise resolve let loop while -> ->>])
   (:require [clojure.core :as cc]
             [clojure.spec.alpha :as s]
             [kitchen-async.specs.promise-macros :as specs]))
@@ -12,6 +12,23 @@
        (new p#
          (fn ~params
            ~@body)))))
+
+(defmacro ^:private with-error-handling [& body]
+  `(try
+     ~@body
+     (catch :default e#
+       (reject e#))))
+
+(defmacro ^:private do* [expr & exprs]
+  (if (empty? exprs)
+    expr
+    `(then ~expr (fn [_#] (do* ~@exprs)))))
+
+(defmacro do [& body]
+  (if (empty? body)
+    `(resolve nil)
+    `(with-error-handling
+       (->promise (do* ~@body)))))
 
 (defmacro let [bindings & body]
   (letfn [(rec [[name init & bindings] body]

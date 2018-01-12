@@ -112,6 +112,20 @@
                 (is 42 x)
                 (done))))))
 
+(deftest do-test
+  (let [v (volatile! 40)
+        p (p/do (p/promise [res]
+                  (vswap! v + 1)
+                  (res nil))
+                (p/promise [res]
+                  (vswap! v + 2)
+                  (res 42)))]
+    (async done
+      (p/then p (fn [x]
+                  (is (= 42 x))
+                  (is (= 43 @v))
+                  (done))))))
+
 (deftest let-simple-test
   (async done
     (let [p (p/let [x (p/resolve 41)]
