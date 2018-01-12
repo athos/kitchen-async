@@ -2,6 +2,13 @@
   (:require [clojure.spec.alpha :as s]
             [kitchen-async.utils :as utils]))
 
+(s/fdef kitchen-async.promise/promise
+  :args (s/cat :params (s/or :arity-0 (s/and vector? #(= (count %) 0))
+                             :arity-1 (s/tuple simple-symbol?)
+                             :arity-2 (s/tuple simple-symbol?
+                                               simple-symbol?))
+               :body (s/* any?)))
+
 (defn- maybe-qualified? [sym x]
   (and (symbol? x)
        (or (= x sym)
