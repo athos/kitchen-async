@@ -1,5 +1,5 @@
 (defproject kitchen-async "0.1.0-SNAPSHOT"
-  :description "Yet another async library for ClojureScript aiming for seamless use of Promises and core.async channels with ease"
+  :description "A Promise library for ClojureScript, or a poor man's core.async"
   :url "https://github.com/athos/kitchen-async"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
