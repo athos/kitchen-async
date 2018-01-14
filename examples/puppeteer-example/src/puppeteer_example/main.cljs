@@ -1,9 +1,6 @@
 (ns puppeteer-example.main
-  (:require [clojure.string :as str]
-            [kitchen-async.promise :as p]
+  (:require [kitchen-async.promise :as p]
             puppeteer))
-
-(enable-console-print!)
 
 (defn main []
   (p/let [browser (puppeteer/launch)
