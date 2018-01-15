@@ -9,6 +9,7 @@
                   :exclusions [org.clojure/tools.reader]]]
 
   :plugins [[lein-cljsbuild "1.1.7"]
+            [lein-tach "0.4.0"]
             [lein-doo "0.1.8"]]
 
   :cljsbuild {:builds
@@ -45,13 +46,20 @@
                            :target :nodejs
                            :optimizations :advanced}}]}
 
+  :tach {:test-runner-ns 'kitchen-async.runner
+         :source-paths ["src" "test/common" "test/self-hosted"]
+         :force-non-zero-exit-on-test-failure? true
+         :cache? true
+         :cache-path "target/lumo-test"}
+
   :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.2"]
                                   [doo "0.1.8"]]}}
 
-  :aliases {"test-all" ["do" ["test"] ["test-min"]]
+  :aliases {"test-all" ["do" ["test"] #_["test-lumo"] ["test-min"]]
             "test" ["do"
                     ["doo" "phantom" "test" "once"]
                     ["doo" "node" "node-test" "once"]]
+            "test-lumo" ["tach" "lumo"]
             "test-min" ["do"
                         ["doo" "phantom" "min-test" "once"]
                         ["doo" "node" "node-min-test" "once"]]}
