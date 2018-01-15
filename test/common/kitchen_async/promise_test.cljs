@@ -1,8 +1,7 @@
 (ns kitchen-async.promise-test
-  (:require [clojure.core.async :as a]
-            [clojure.test :refer [deftest is async]]
+  (:require [clojure.test :refer [deftest is async]]
             goog.Promise
-            [kitchen-async.promise :as p :include-macros true]))
+            [kitchen-async.promise :as p]))
 
 (deftest promise-resolve-test
   (async done
@@ -46,15 +45,6 @@
                  (is (= 42 x))
                  (done))))))
 
-(deftest ->promise-from-chan-test
-  (async done
-    (let [ch (a/chan)
-          p (p/->promise ch)]
-      (js/setTimeout #(a/put! ch 42) 0)
-      (.then p (fn [x]
-                 (is (= 42 x))
-                 (done))))))
-
 (deftest then-test
   (async done
     (p/then (p/resolve 42)
@@ -77,40 +67,28 @@
                   (is (= msg (ex-message e)))
                   (done))))))
 
-(deftest catch*-from-chan-test
+(deftest timeout-test
   (async done
-    (let [msg "something wrong has happened!!"
-          ch (a/chan)]
-      (js/setTimeout #(a/put! ch (ex-info msg {})) 0)
-      (p/catch* ch
-                (fn [e]
-                  (is (= msg (ex-message e)))
-                  (done))))))
+         (let [t (js/Date.)]
+           (p/then (p/timeout 100 42)
+                   (fn [x]
+                     (is (>= (- (js/Date.) t) 100))
+                     (is 42 x)
+                     (done))))))
 
 (deftest all-test
   (async done
-    (let [ch (a/chan)
-          p (p/all [(p/resolve 42) ch])]
-      (a/put! ch 43)
+    (let [p (p/all [(p/resolve 42) (p/timeout 0 43)])]
       (p/then p (fn [x]
                   (= [42 43] x)
                   (done))))))
 
 (deftest race-test
   (async done
-    (p/then (p/race [(p/resolve 42) (a/chan)])
+    (p/then (p/race [(p/resolve 42) (p/promise [])])
             (fn [x]
               (is (= 42 x))
               (done)))))
-
-(deftest timeout-test
-  (async done
-    (let [t (js/Date.)]
-      (p/then (p/timeout 100 42)
-              (fn [x]
-                (is (>= (- (js/Date.) t) 100))
-                (is 42 x)
-                (done))))))
 
 (deftest do-test
   (let [v (volatile! 40)
@@ -145,54 +123,38 @@
                   (is (= 42 x))
                   (done))))))
 
-(deftest let-polymorphic-test
-  (async done
-    (let [ch (a/chan)
-          p (p/let [x 40
-                    y ch]
-              (+ x y))]
-      (a/put! ch 2)
-      (p/then p (fn [x]
-                  (is (= 42 x))
-                  (done))))))
-
 (deftest plet-test
   (async done
-    (let [ch (a/chan)
-          p (p/plet [x (p/resolve 21)
-                     y ch]
+    (let [p (p/plet [x (p/resolve 21)
+                     y (p/timeout 0 21)]
               (+ x y))]
-      (a/put! ch 21)
       (p/then p (fn [x]
                   (is (= 42 x))
                   (done))))))
 
 (deftest loop-test
   (async done
-    (let [ch (a/chan)
-          p (p/loop [v ch
+    (let [v (volatile! 18)
+          f (fn []
+              (vswap! v + 2)
+              (p/resolve @v))
+          p (p/loop [v (f)
                      sum 0]
-              (if (> v 0)
-                (p/recur ch (+ sum v))
-                sum))]
-      (a/put! ch 20)
-      (a/put! ch 22)
-      (a/put! ch 0)
+              (if (> sum 40)
+                sum
+                (p/recur (f) (+ sum v))))]
       (p/then p (fn [x]
                   (is (= x 42))
                   (done))))))
 
 (deftest while-test
   (async done
-    (let [ch (a/chan)
-          a (atom 0)
-          p (p/while (<= @a 30)
-              (p/let [v ch]
-                (swap! a + v)))]
-      (a/put! ch 20)
-      (a/put! ch 22)
+    (let [i (volatile! 0)
+          f #(p/resolve (< % 2))
+          p (p/while (f @i)
+              (vswap! i inc))]
       (p/then p (fn [_]
-                  (is (= 42 @a))
+                  (is (= 2 @i))
                   (done))))))
 
 (deftest ->-test
