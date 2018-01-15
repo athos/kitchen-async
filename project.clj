@@ -19,26 +19,26 @@
                            :optimizations :none
                            :pretty-print true}}
                {:id "test"
-                :source-paths ["src" "test"]
+                :source-paths ["src" "test/common" "test/jvm"]
                 :compiler {:output-to "target/test/kitchen_async.js"
                            :output-dir "target/test"
                            :main kitchen-async.runner
                            :optimizations :whitespace}}
                {:id "min-test"
-                :source-paths ["src" "test"]
+                :source-paths ["src" "test/common" "test/jvm"]
                 :compiler {:output-to "target/min-test/kitchen_async.js"
                            :output-dir "target/min-test"
                            :main kitchen-async.runner
                            :optimizations :advanced}}
                {:id "node-test"
-                :source-paths ["src" "test"]
+                :source-paths ["src" "test/common" "test/jvm"]
                 :compiler {:output-to "target/node-test/kitchen_async.js"
                            :output-dir "target/node-test"
                            :main kitchen-async.runner
                            :target :nodejs
                            :optimizations :none}}
                {:id "node-min-test"
-                :source-paths ["src" "test"]
+                :source-paths ["src" "test/common" "test/jvm"]
                 :compiler {:output-to "target/node-min-test/kitchen_async.js"
                            :output-dir "target/node-min-test"
                            :main kitchen-async.runner
