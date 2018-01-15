@@ -1,10 +1,7 @@
 (ns kitchen-async.promise
   (:refer-clojure :exclude [resolve])
-  (:require-macros [kitchen-async.promise :as p]
-                   [cljs.core.async.macros :refer [go]])
-  (:require [clojure.core.async :as a]
-            [clojure.core.async.impl.channels :refer [ManyToManyChannel]]
-            goog.Promise))
+  (:require-macros [kitchen-async.promise :as p])
+  (:require goog.Promise))
 
 (def ^:private %promise-impl
   (let [init (if (exists? js/Promise)
@@ -58,15 +55,6 @@
 (extend-protocol Promisable
   goog.Promise
   (->promise* [p] p)
-
-  ManyToManyChannel
-  (->promise* [c]
-    (p/promise [resolve reject]
-      (go
-        (let [x (a/<! c)]
-          (if (instance? js/Error x)
-            (reject x)
-            (resolve x))))))
 
   default
   (->promise* [x]
