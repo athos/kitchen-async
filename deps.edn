@@ -1,0 +1,9 @@
+{:paths ["src"]
+ :deps {org.clojure/clojure {:mvn/version "1.9.0"}
+        org.clojure/clojurescript {:mvn/version "1.9.946"}
+        org.clojure/core.async {:mvn/version "0.4.474"}}
+ :aliases
+ {:dev {:extra-deps {com.cemerick/piggieback {:mvn/version "0.2.2"}}}
+  :test-jvm {:extra-paths ["test/common" "test/jvm"]
+             :extra-deps {doo "0.1.8"}}
+  :test-self-hosted {:extra-paths ["test/common" "test/self-hosted"]}}}
