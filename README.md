@@ -10,6 +10,12 @@ Add the following to your `:dependencies`:
 
 [![Clojars Project](https://clojars.org/kitchen-async/latest-version.svg)](https://clojars.org/kitchen-async)
 
+Or, if you'd rather use an unstable version of the library, you can do that easily via [`deps.edn`](https://clojure.org/guides/deps_and_cli) as well:
+
+```clj
+github-athos/kitchen-async {:git/url "https://github.com/athos/kitchen-async.git" :sha <commit sha hash>}
+```
+
 ## Usage
 
 FIXME
