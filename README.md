@@ -4,6 +4,32 @@
 
 A Promise library for ClojureScript, or a poor man's core.async
 
+## Example
+
+Assume you are writing some `Promise`-heavy async code in ClojureScript (e.g. [Google's Puppeteer](https://github.com/GoogleChrome/puppeteer) provides such a collection of APIs). Then, if you only use raw JavaScript interop facilities for it, you would have to write something like this:
+
+```clj
+(-> (puppeteer/launch)
+    (.then (fn [browser]
+             (-> (.newPage browser)
+                 (.then (fn [page]
+                          (.then (.goto page "https://www.google.com")
+                                 #(.screenshot page #js{:path "screenshot.png"}))))
+                 (.then #(.close browser))))))
+```
+
+`kitchen-async` provides more succinct, "direct style" syntax sugars for those things, which you may find similar to `async/await` in ECMAScript 2017:
+
+```clj
+(require '[kitchen-async.promise :as p])
+
+(p/let [browser (puppeteer/launch)
+        page (.newPage browser)]
+  (.goto page "https://www.google.com")
+  (.screenshot page #js{:path "screenshot.png"})
+  (.close browser))
+```
+
 ## Installation
 
 Add the following to your `:dependencies`:
@@ -19,6 +45,14 @@ github-athos/kitchen-async {:git/url "https://github.com/athos/kitchen-async.git
 ## Usage
 
 FIXME
+
+<!--
+
+## Why not use core.async?
+
+[`core.async`](https://github.com/clojure/core.async) also provides similar async functionalities to `kitchen-async` (and as you may know, it's more powerful in fact), while I believe there are still some rooms where `kitchen-async` shines, such as blah blah blah
+
+-->
 
 ## License
 
