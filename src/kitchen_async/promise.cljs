@@ -68,10 +68,15 @@
 (defn ->promise [x]
   (->promise* x))
 
-(defn callback->promise [f & args]
-  (p/promise [resolve reject]
-    (letfn [(callback [err val]
-              (if err
-                (reject err)
-                (resolve val)))]
-      (apply f (concat args [callback])))))
+(defn promisify
+  "Given a fn that takes a callback fn as its last arg, and returns
+  a modified version of that fn that returns a promise instead of
+  calling the callback"
+  [f]
+  (fn [& args]
+    (p/promise [resolve reject]
+      (letfn [(callback [err val]
+                (if err
+                  (reject err)
+                  (resolve val)))]
+        (apply f (concat args [callback]))))))
