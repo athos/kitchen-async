@@ -38,10 +38,10 @@
   (then p f f))
 
 (defn all [ps]
-  (goog.Promise.all (clj->js (map ->promise ps))))
+  (goog.Promise.all (into-array (map ->promise ps))))
 
 (defn race [ps]
-  (goog.Promise.race (clj->js (map ->promise ps))))
+  (goog.Promise.race (into-array (map ->promise ps))))
 
 (defn timeout
   ([ms] (timeout ms nil))

@@ -46,7 +46,7 @@
            names (mapv first pairs)
            inits (mapv (fn [[_ e]] `(->promise ~e)) pairs)]
     `(with-error-handling
-       (then (goog.Promise.all (cc/clj->js ~inits))
+       (then (goog.Promise.all (into-array ~inits))
              (fn [~names] (do* ~@body))))))
 
 (def ^:private LOOP_FN_NAME (gensym 'loop-fn))
