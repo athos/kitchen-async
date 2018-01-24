@@ -63,9 +63,11 @@
          (~LOOP_FN_NAME ~@inits)))))
 
 (defmacro recur [& args]
-  (cc/let [gensyms (mapv (fn [_] (gensym)) args)]
-    `(plet [~gensyms ~(vec args)]
-       (~LOOP_FN_NAME ~@gensyms))))
+  (if-not (contains? (:locals &env) LOOP_FN_NAME)
+    (throw (ex-info "Can't call kitchen-async.promise/recur outside of kitchen-async.promise/loop" {}))
+    (cc/let [gensyms (mapv (fn [_] (gensym)) args)]
+      `(plet [~gensyms ~(vec args)]
+             (~LOOP_FN_NAME ~@gensyms)))))
 
 (defmacro while [cond & body]
   `(loop [v# ~cond]
