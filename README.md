@@ -18,7 +18,7 @@ Assume you are writing some `Promise`-heavy async code in ClojureScript (e.g. [G
                  (.then #(.close browser))))))
 ```
 
-`kitchen-async` provides more succinct, "direct style" syntax sugars for those things, which you may find similar to `async/await` in ECMAScript 2017:
+`kitchen-async` provides more succinct, "direct style" syntactic sugar for those things, which you may find similar to `async/await` in ECMAScript 2017:
 
 ```clj
 (require '[kitchen-async.promise :as p])
