@@ -1,7 +1,8 @@
 (ns kitchen-async.promise
   (:refer-clojure :exclude [resolve])
   (:require-macros [kitchen-async.promise :as p])
-  (:require goog.Promise))
+  (:require goog.Promise
+            [kitchen-async.protocols.promisable :as promisable]))
 
 (def ^:private %promise-impl
   (let [init (if (exists? js/Promise)
@@ -49,10 +50,7 @@
    (p/promise [resolve]
      (js/setTimeout #(resolve v) ms))))
 
-(defprotocol Promisable
-  (->promise* [this]))
-
-(extend-protocol Promisable
+(extend-protocol promisable/Promisable
   goog.Promise
   (->promise* [p] p)
 
@@ -62,11 +60,11 @@
 
 (when (exists? js/Promise)
   (extend-type js/Promise
-    Promisable
+    promisable/Promisable
     (->promise* [p] p)))
 
 (defn ->promise [x]
-  (->promise* x))
+  (promisable/->promise* x))
 
 (defn promisify
   "Given a fn that takes a callback fn as its last arg, and returns
