@@ -175,6 +175,44 @@
               (is (= 42 x))
               (done)))))
 
+(deftest some->-non-nil-test
+  (async done
+    (p/then (p/some-> (p/resolve 43)
+                      inc
+                      (- 2))
+            (fn [x]
+              (is (= 42 x))
+              (done)))))
+
+(deftest some->-nil-test
+  (async done
+    (p/then (p/some-> (p/resolve 43)
+                      inc
+                      ((constantly nil))
+                      (- 2))
+            (fn [x]
+              (is (= nil x))
+              (done)))))
+
+(deftest some->>-non-nil-test
+  (async done
+    (p/then (p/some->> (p/resolve 1)
+                       inc
+                       (- 44))
+            (fn [x]
+              (is (= 42 x))
+              (done)))))
+
+(deftest some->>-nil-test
+  (async done
+    (p/then (p/some->> (p/resolve 1)
+                       inc
+                       ((constantly nil))
+                       (- 44))
+            (fn [x]
+              (is (= nil x))
+              (done)))))
+
 (deftest try-success-test
   (async done
     (p/then (p/try 42)

@@ -1,5 +1,5 @@
 (ns kitchen-async.promise
-  (:refer-clojure :exclude [promise resolve let loop while -> ->>])
+  (:refer-clojure :exclude [promise resolve let loop while -> ->> some-> some->>])
   (:require [clojure.core :as cc]
             [clojure.spec.alpha :as s]
             [kitchen-async.specs.promise-macros :as specs]))
@@ -96,6 +96,18 @@
                        form))
               ~@forms)))
     x))
+
+(defmacro some-> [expr & forms]
+  (cc/let [g (gensym)]
+    `(-> ~expr
+         ~@(for [form forms]
+             `((fn [~g] (if (nil? ~g) nil (cc/-> ~g ~form))))))))
+
+(defmacro some->> [expr & forms]
+  (cc/let [g (gensym)]
+    `(->> ~expr
+          ~@(for [form forms]
+              `((fn [~g] (if (nil? ~g) nil (cc/->> ~g ~form))))))))
 
 (defmacro try [& body]
   (cc/let [conformed (s/conform ::specs/try-args body)
