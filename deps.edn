@@ -5,5 +5,5 @@
  :aliases
  {:dev {:extra-deps {com.cemerick/piggieback {:mvn/version "0.2.2"}}}
   :test-jvm {:extra-paths ["test/common" "test/jvm"]
-             :extra-deps {doo "0.1.8"}}
+             :extra-deps {doo {:mvn/version "0.1.8"}}}
   :test-self-hosted {:extra-paths ["test/common" "test/self-hosted"]}}}
