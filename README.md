@@ -4,6 +4,11 @@
 
 A Promise library for ClojureScript, or a poor man's core.async
 
+It features:
+- syntactic support for writing asynchronous code handling Promises as easily as with `async/await` in ECMAScript
+- available on self-hosted ClojureScript environments, such as [Lumo](https://github.com/anmonteiro/lumo)/[Planck](https://github.com/mfikes/planck)
+- seamless integration with core.async channels
+
 ## Example
 
 Assume you are writing some `Promise`-heavy async code in ClojureScript (e.g. [Google's Puppeteer](https://github.com/GoogleChrome/puppeteer) provides such a collection of APIs). Then, if you only use raw JavaScript interop facilities for it, you would have to write something like this:
