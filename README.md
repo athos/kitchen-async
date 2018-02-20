@@ -49,7 +49,40 @@ athos/kitchen-async {:git/url "https://github.com/athos/kitchen-async.git" :sha 
 
 ## Usage
 
-FIXME
+kitchen-async provides two major categories of APIs:
+- [thin wrapper APIs for JS Promise](#thin-wrapper-apis-for-js-promise)
+- [idiomatic Clojure style syntactic sugar](#idiomatic-clojure-style-syntactic-sugar)
+
+You can use these APIs once you `require` `kitchen-async.promise` ns, like the following:
+
+```clj
+(require '[kitchen-async.promise :as p])
+```
+
+### Thin wrapper APIs for JS Promise
+
+#### `p/promise` macro
+#### `p/then` & `p/catch*`
+#### `p/resolve` & `p/reject`
+#### `p/all` & `p/race`
+#### Coersion operator
+
+### Idiomatic Clojure style syntactic sugar
+
+#### `p/do`
+#### `p/let`
+#### Threading macros
+#### `p/loop`
+#### `p/while`
+#### Error handling
+
+### Extension of coersion operator
+
+(TODO)
+
+### Integration with core.async channels
+
+(TODO)
 
 <!--
 
