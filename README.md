@@ -6,7 +6,7 @@ A Promise library for ClojureScript, or a poor man's core.async
 
 It features:
 - syntactic support for writing asynchronous code handling Promises as easily as with `async/await` in ECMAScript
-- available on self-hosted ClojureScript environments, such as [Lumo](https://github.com/anmonteiro/lumo)/[Planck](https://github.com/mfikes/planck)
+- also available on self-hosted ClojureScript environments, such as [Lumo](https://github.com/anmonteiro/lumo)/[Planck](https://github.com/mfikes/planck)
 - seamless integration with core.async channels
 
 ## Example
@@ -44,7 +44,7 @@ Add the following to your `:dependencies`:
 Or, if you'd rather use an unstable version of the library, you can do that easily via [`deps.edn`](https://clojure.org/guides/deps_and_cli) as well:
 
 ```clj
-github-athos/kitchen-async {:git/url "https://github.com/athos/kitchen-async.git" :sha <commit sha hash>}
+athos/kitchen-async {:git/url "https://github.com/athos/kitchen-async.git" :sha <commit sha hash>}
 ```
 
 ## Usage
