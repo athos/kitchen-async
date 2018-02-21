@@ -65,7 +65,7 @@ You can use these APIs once you `require` `kitchen-async.promise` ns, like the f
 #### `p/then` & `p/catch*`
 #### `p/resolve` & `p/reject`
 #### `p/all` & `p/race`
-#### Coersion operator
+#### Coercion operator
 
 ### Idiomatic Clojure style syntactic sugar
 
@@ -76,7 +76,7 @@ You can use these APIs once you `require` `kitchen-async.promise` ns, like the f
 #### `p/while`
 #### Error handling
 
-### Extension of coersion operator
+### Extension of coercion operator
 
 (TODO)
 
