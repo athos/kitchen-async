@@ -134,6 +134,24 @@ is almost equivalent to:
 
 #### * Coercion operator and implicit coercion
 
+kitchen-async provides a fn named `p/->promise`, which coerces an arbitrary value to a Promise. By default, `p/->promise` behaves as follows:
+
+- For Promises, acts like `identity` (i.e. returns the argument as is)
+- For any other type of values, acts like `p/resolve`
+
+In fact, most functions defined as the thin wrapper API (and the macros that will be described below) implicitly apply `p/->promise` to their input values. Thanks to that trick, you can freely mix up non-Promise values together with Promises:
+
+```clj
+(p/then 42 prn) 
+;; it will output 42 with no error
+
+(p/then (p/all [21 (p/resolve 21)])
+        (fn [[x y]] (prn (+ x y))))
+;; this also works well
+```
+
+Moreover, since it's defined as a protocol method, it's possible to extend `p/->promise` to customize its behavior for a specific data type. For details, see the section ["Extension of coercion operator"](#extension-of-coercion-operator). The section ["Integration with core.async channels"](#integration-with-coreasync-channels) may also help you grasp how we can utilize this capability.
+
 ### Idiomatic Clojure style syntactic sugar
 
 #### `p/do`
