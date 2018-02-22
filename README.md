@@ -53,7 +53,7 @@ kitchen-async provides two major categories of APIs:
 - [thin wrapper APIs for JS Promise](#thin-wrapper-apis-for-js-promise)
 - [idiomatic Clojure style syntactic sugar](#idiomatic-clojure-style-syntactic-sugar)
 
-You can use these APIs once you `require` `kitchen-async.promise` ns, like the following:
+You can use all these APIs once you `require` `kitchen-async.promise` ns, like the following:
 
 ```clj
 (require '[kitchen-async.promise :as p])
@@ -61,11 +61,78 @@ You can use these APIs once you `require` `kitchen-async.promise` ns, like the f
 
 ### Thin wrapper APIs for JS Promise
 
-#### `p/promise` macro
-#### `p/then` & `p/catch*`
-#### `p/resolve` & `p/reject`
-#### `p/all` & `p/race`
-#### Coercion operator
+#### * `p/promise` macro
+
+`p/promise` macro creates a new Promise:
+
+```clj
+(p/promise [resolve reject]
+  (js/setTimeout #(resolve 42) 1000))  
+;=> #object[Promise [object Promise]]
+```
+
+This code is equivalent to:
+
+```clj
+(js/Promise. 
+ (fn [resolve reject]
+   (js/setTimeout #(resolve 42) 1000)))
+```
+
+#### * `p/then` & `p/catch*`
+
+`p/then` and `p/catch*` simply wrap Promise's `.then` and `.catch` methods, respectively. For example:
+
+```clj
+(-> (some-promise-fn)
+    (p/then (fn [x] (js/console.log x)))
+    (p/catch* (fn [err] (js/console.error err))))
+```
+
+is almost equivalent to:
+
+```clj
+(-> (some-promise-fn)
+    (.then (fn [x] (js/console.log x)))
+    (.catch (fn [err] (js/console.error err))))
+```
+
+#### * `p/resolve` & `p/reject`
+
+`p/resolve` and `p/reject` wraps `Promise.resolve` and `Promise.reject`, respectively. For example:
+
+```clj
+(p/then (p/resolve 42) prn)
+```
+
+is equivalent to:
+
+```clj
+(.then (js/Promise.resolve 42) prn)
+```
+
+#### * `p/all` & `p/race`
+
+`p/all` and `p/race` wraps `Promise.all` and `Promise.race`, respectively. For example:
+
+```clj
+(p/then (p/all [(p/resolve 21)
+                (p/promise [resolve]
+                  (js/setTimeout #(resolve 21) 1000))])
+        (fn [[x y]] (prn (+ x y))))
+```
+
+is almost equivalent to:
+
+```clj
+(.then (js/Promise.all #js[(js/Promise.resolve 42)
+                           (js/Promise.
+                             (fn [resolve]
+                               (js/setTimeout #(resolve 42) 1000)))])
+       (fn [[x y]] (prn (+ x y))))
+```
+
+#### * Coercion operator and implicit coercion
 
 ### Idiomatic Clojure style syntactic sugar
 
