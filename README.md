@@ -154,8 +154,64 @@ Moreover, since it's defined as a protocol method, it's possible to extend `p/->
 
 ### Idiomatic Clojure style syntactic sugar
 
+kitchen-async also provides variant of several macros (including special forms) in `clojure.core` that return a Promise instead of returning the expression value.
+
 #### `p/do`
+
+`p/do` conjoins the expressions of the body with `p/then` ignoring the intermediate values. For example:
+
+```clj
+(p/do
+  (expr1)
+  (expr2)
+  (expr3))
+```
+
+is equivalent to:
+
+```clj
+(p/then (expr1)
+        (fn [_]
+          (p/then (expr2)
+                  (fn [_] (expr3)))))
+```
+
 #### `p/let`
+
+`p/let` is almost the same as `p/do` except that it names each intermediate value with the corresponding name. For example:
+
+```clj
+(p/let [v1 (expr1)
+        v2 (expr2)]
+  (expr3))
+```
+
+is equivalent to:
+
+```clj
+(p/then (expr1)
+        (fn [v1]
+          (p/then (expr2)
+                  (fn [v2] (expr3)))))
+```
+
+Note that the body of `p/let` is implicitly wrapped with `p/do` when it has multiple expressions in it. For example, when you write some code like:
+
+```clj
+(p/let [v1 (expr1)]
+  (expr2)
+  (expr3))
+```
+
+the call to `expr3` will be deferred until `(expr2)` is resolved. To avoid this behavior, you must wrap the body with `do` explicitly:
+
+```clj
+(p/let [v1 (expr1)]
+  (do
+    (expr2)
+    (expr3)))
+```
+
 #### Threading macros
 #### `p/loop`
 #### `p/while`
