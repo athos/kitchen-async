@@ -7,7 +7,7 @@ A Promise library for ClojureScript, or a poor man's core.async
 It features:
 - syntactic support for writing asynchronous code handling Promises as easily as with `async/await` in ECMAScript
 - also available on self-hosted ClojureScript environments, such as [Lumo](https://github.com/anmonteiro/lumo)/[Planck](https://github.com/mfikes/planck)
-- seamless integration with core.async channels
+- seamless (opt-in) integration with core.async channels
 
 ## Example
 
