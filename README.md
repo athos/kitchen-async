@@ -4,7 +4,8 @@
 
 A Promise library for ClojureScript, or a poor man's core.async
 
-It features:
+## Features
+
 - syntactic support for writing asynchronous code handling Promises as easily as with `async/await` in ECMAScript
 - also available on self-hosted ClojureScript environments, such as [Lumo](https://github.com/anmonteiro/lumo)/[Planck](https://github.com/mfikes/planck)
 - seamless (opt-in) integration with core.async channels
@@ -150,7 +151,7 @@ In fact, most functions defined as the thin wrapper API (and the macros that wil
 ;; this also works well
 ```
 
-Moreover, since it's defined as a protocol method, it's possible to extend `p/->promise` to customize its behavior for a specific data type. For details, see the section ["Extension of coercion operator"](#extension-of-coercion-operator). The section ["Integration with core.async channels"](#integration-with-coreasync-channels) may also help you grasp how we can utilize this capability.
+Moreover, since it's defined as a protocol method, it's possible to extend `p/->promise` to customize its behavior for a specific data type. For details, see the section ["Extension of coercion operator"](#extension-of-coercion-operator). Also, the section ["Integration with core.async channels"](#integration-with-coreasync-channels) may help you grasp how we can utilize this capability.
 
 ### Idiomatic Clojure style syntactic sugar
 
@@ -195,7 +196,7 @@ is equivalent to:
                   (fn [v2] (expr3)))))
 ```
 
-Note that the body of `p/let` is implicitly wrapped with `p/do` when it has multiple expressions in it. For example, when you write some code like:
+Note that the body of the `p/let` is implicitly wrapped with `p/do` when it has multiple expressions in it. For example, when you write some code like:
 
 ```clj
 (p/let [v1 (expr1)]
@@ -213,9 +214,84 @@ the call to `expr3` will be deferred until `(expr2)` is resolved. To avoid this 
 ```
 
 #### Threading macros
-#### `p/loop`
-#### `p/while`
+
+kitchen-async also has its own `->`, `->>`, `some->` and `some->>`. For example:
+
+```clj
+(p/-> (expr) f (g c))
+```
+
+is equivalent to:
+
+```clj
+(-> (expr)
+    (p/then (fn [x] (f x)))
+    (p/then (fn [y] (g y c))))
+```
+
+and
+
+```clj
+(p/some-> (expr) f (g c))
+```
+
+is equivalent to:
+
+```clj
+(-> (expr)
+    (p/then (fn [x] (some-> x f)))
+    (p/then (fn [y] (some-> y (g c))))
+```
+
+#### Loops
+
+For loops, you can use `p/loop` and `p/recur`:
+
+```clj
+(defn timeout [ms v]
+  (p/promise [resolve]
+    (js/setTimeout #(resolve v) ms)))
+    
+(p/loop [i (timeout 1000 10)]
+  (when (> i 0)
+    (prn i)
+    (p/recur (timeout 1000 (dec i)))))
+    
+;; Count down the numbers from 10 to 1
+```
+
+Note that the body of the `p/loop` is wrapped with `p/do`, as in the `p/let`.
+
+`p/recur` cannot be used outside of the `p/loop`, and also make sure to call `p/recur` at a tail position.
+
 #### Error handling
+
+For error handling, you can use `p/try`, `p/catch` and `p/finally`:
+
+```clj
+(p/try
+  (expr)
+  (p/catch js/Error e
+    (js/console.error e))
+  (p/finally
+    (teardown)))
+```
+
+is almost equivalent to:
+
+```clj
+(-> (expr)
+    (p/catch* 
+     (fn [e]
+       (if (instance? js/Error e)
+         (js/console.error e)
+         (throw e))))
+    (p/then [_] (teardown)))
+```
+
+Note that the body of the `p/try`, `p/catch` and `p/finally` is wrapped with `p/do`, as in the `p/let`.
+
+`p/catch` and `p/finally` cannot be used outside of the `p/try`, and also make sure to call them at a tail position.
 
 ### Extension of coercion operator
 
