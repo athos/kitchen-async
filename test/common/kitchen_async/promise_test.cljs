@@ -241,27 +241,32 @@
 
 (deftest try-finally-test
   (async done
-    (p/then (p/try
-              (p/resolve 41)
-              (p/catch :default e
-                (assert false "not reached"))
-              (p/finally 42))
-            (fn [x]
-              (is (= 42 x))
-              (done)))))
+    (let [called? (volatile! false)]
+      (p/then (p/try
+                42
+                (p/catch :default e
+                  (assert false "not reached"))
+                (p/finally
+                  (vreset! called? true)
+                  43))
+              (fn [x]
+                (is (= 42 x))
+                (is (= @called? true))
+                (done))))))
 
 (deftest try-catch-finally-test
   (async done
-    (let [v (volatile! 39)]
+    (let [called? (volatile! false)]
       (p/then (p/try
                 (throw (ex-info "something wrong has happened!!" {}))
                 (p/catch :default e
-                  (vswap! v + 1))
+                  42)
                 (p/finally
-                  (vswap! v + 2)
-                  @v))
+                  (vreset! called? true)
+                  43))
               (fn [x]
                 (is (= 42 x))
+                (is (= @called? true))
                 (done))))))
 
 (deftest nested-try-catch-test

@@ -129,7 +129,8 @@
               ~@(when-let [clauses (:catch-clauses conformed)]
                   (emit-catches clauses))
               ~@(when-let [clause (:finally-clause conformed)]
-                  `((finally* (fn [_#] (do* ~@(:finally-body clause))))))))))
+                  `((finally*
+                     (fn [v#] (do* ~@(:finally-body clause) v#)))))))))
 
 (defmacro catch [classname name & expr*]
   (throw (ex-info "Can't call kitchen-async.promise/catch outside of kitchen-async.promise/try" {})))
