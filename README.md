@@ -10,6 +10,8 @@ A Promise library for ClojureScript, or a poor man's core.async
 - also available on self-hosted ClojureScript environments, such as [Lumo](https://github.com/anmonteiro/lumo)/[Planck](https://github.com/mfikes/planck)
 - seamless (opt-in) integration with core.async channels
 
+kitchen-async focuses on the ease of Promise handling, and is not specifically intended to be so much performant. If you would rather like such a library, [promesa](https://github.com/funcool/promesa) or [core.async](https://github.com/clojure/core.async) might be more suitable.
+
 ## Example
 
 Assume you are writing some `Promise`-heavy async code in ClojureScript (e.g. [Google's Puppeteer](https://github.com/GoogleChrome/puppeteer) provides such a collection of APIs). Then, if you only use raw JavaScript interop facilities for it, you would have to write something like this:
