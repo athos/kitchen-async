@@ -288,7 +288,7 @@ is almost equivalent to:
        (if (instance? js/Error e)
          (js/console.error e)
          (throw e))))
-    (p/then [_] (teardown)))
+    (p/then (fn [v] (p/do (teardown) v))))
 ```
 
 Note that the body of the `p/try`, `p/catch` and `p/finally` is wrapped with `p/do`, as in the `p/let`.
