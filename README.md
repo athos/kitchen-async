@@ -293,7 +293,7 @@ is almost equivalent to:
 
 Note that the body of the `p/try`, `p/catch` and `p/finally` is wrapped with `p/do`, as in the `p/let`.
 
-`p/catch` and `p/finally` cannot be used outside of the `p/try`, and also make sure to call them at a tail position.
+`p/catch` and `p/finally` (if any) cannot be used outside of the `p/try`, and also make sure to call them at the end of the `p/try`'s body.
 
 ### Extension of coercion operator
 
