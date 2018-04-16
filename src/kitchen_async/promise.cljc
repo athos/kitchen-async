@@ -75,14 +75,21 @@
        (let [_# (do* ~@body)]
          (kitchen-async.promise/recur ~cond)))))
 
+(defn- interop? [form]
+  (and (symbol? form) (= (nth (name form) 0) \.)))
+
 (defmacro -> [x & forms]
   (if forms
     (cc/let [[form & forms] forms]
       `(with-error-handling
          (-> (then ~x
-                   ~(if (seq? form)
-                     `(fn [v#] (~(first form) v# ~@(rest form)))
-                     form))
+                   ~(cond (seq? form)
+                          `(fn [v#] (~(first form) v# ~@(rest form)))
+
+                          (interop? form)
+                          `(fn [v#] (~form v#))
+
+                          :else form))
              ~@forms)))
     x))
 
@@ -91,9 +98,13 @@
     (cc/let [[form & forms] forms]
       `(with-error-handling
          (->> (then ~x
-                    ~(if (seq? form)
-                       `(fn [v#] (~@form v#))
-                       form))
+                    ~(cond (seq? form)
+                           `(fn [v#] (~@form v#))
+
+                           (interop? form)
+                           `(fn [v#] (~form v#))
+
+                           :else form))
               ~@forms)))
     x))
 
