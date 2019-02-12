@@ -28,12 +28,12 @@
 
 (defn then
   ([p f]
-   (.then (->promise p) f))
+   (.then (->promise p) (fn [x] (f x))))
   ([p f g]
-   (.then (->promise p) f g)))
+   (.then (->promise p) (fn [x] (f x)) (fn [x] (g x)))))
 
 (defn catch* [p f]
-  (then p nil f))
+  (then p identity f))
 
 (defn finally* [p f]
   (then p f f))

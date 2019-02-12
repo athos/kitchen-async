@@ -59,6 +59,14 @@
               (is (= 42 x))
               (done)))))
 
+(deftest then-with-keyword-test
+  (async done
+    (-> (p/resolve {:x 42})
+        (p/then :x)
+        (p/then (fn [x]
+                  (is (= 42 x))
+                  (done))))))
+
 (deftest catch*-test
   (async done
     (let [msg "something wrong has happened!!"]
@@ -66,6 +74,15 @@
                 (fn [e]
                   (is (= msg (ex-message e)))
                   (done))))))
+
+(deftest catch*-with-keyword-test
+  (async done
+    (let [msg "something wrong has happend!!"]
+      (-> (p/reject {:msg msg})
+          (p/catch* :msg)
+          (p/then (fn [s]
+                    (is (= s msg))
+                    (done)))))))
 
 (deftest timeout-test
   (async done
@@ -166,11 +183,29 @@
               (is (= 42 x))
               (done)))))
 
+(deftest ->-with-keyword-test
+  (async done
+    (p/then (p/-> (p/timeout 0 {:x 39})
+                  :x
+                  (+ 3))
+            (fn [x]
+              (is (= 42 x))
+              (done)))))
+
 (deftest ->>-test
   (async done
     (p/then (p/->> (p/resolve 41)
                    (p/timeout 0)
                    inc)
+            (fn [x]
+              (is (= 42 x))
+              (done)))))
+
+(deftest ->>-with-keyword-test
+  (async done
+    (p/then (p/->> (p/resolve {:x 2})
+                   :x
+                   (- 44))
             (fn [x]
               (is (= 42 x))
               (done)))))
@@ -194,6 +229,15 @@
               (is (= nil x))
               (done)))))
 
+(deftest some->-with-keyword-test
+  (async done
+    (p/then (p/some-> (p/resolve {:x 44})
+                      :x
+                      (- 2))
+            (fn [x]
+              (is (= 42 x))
+              (done)))))
+
 (deftest some->>-non-nil-test
   (async done
     (p/then (p/some->> (p/resolve 1)
@@ -211,6 +255,15 @@
                        (- 44))
             (fn [x]
               (is (= nil x))
+              (done)))))
+
+(deftest some->>-with-keyword-test
+  (async done
+    (p/then (p/some->> (p/resolve {:x 2})
+                       :x
+                       (- 44))
+            (fn [x]
+              (is (= 42 x))
               (done)))))
 
 (deftest try-success-test
