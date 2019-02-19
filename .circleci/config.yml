@@ -2,31 +2,54 @@ version: 2
 jobs:
   build:
     docker:
-      - image: jesiio/web:0.1
+      - image: athos/cljs-dev:openjdk-8-alpine-20190219-0
 
     working_directory: ~/repo
 
     environment:
       LEIN_ROOT: "true"
       JVM_OPTS: -Xmx3200m
+      CHROMIUM_BIN: /usr/bin/chromium-browser
 
     steps:
       - checkout
 
       # Download and cache dependencies
       - restore_cache:
-          key: v1-dependencies-{{ checksum "project.clj" }}
+          name: restore npm cache
+          key: v1-npm-{{ checksum "package-lock.json" }}
+
+      - run: npm ci
+
+      - save_cache:
+          name: save npm cache
+          paths:
+            - ~/.npm
+          key: v1-npm-{{ checksum "package-lock.json" }}
+
+      - restore_cache:
+          name: restore clj cache
+          key: v1-clj-{{ checksum "project.clj" }}
 
       - run: lein deps
 
       - save_cache:
+          name: save clj cache
           paths:
             - ~/.m2
-          key: v1-dependencies-{{ checksum "project.clj" }}
+          key: v1-clj-{{ checksum "project.clj" }}
 
       - run:
-          name: test
-          command: lein test-all
+          name: browser test
+          command: lein doo chromium-headless test once
+
+      - run:
+          name: browser min test
+          command: lein doo chromium-headless min-test once
+
+      - run:
+          name: node test
+          command: lein doo node node-test once
 
       # - run:
       #     name: code-coverage
