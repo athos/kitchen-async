@@ -52,6 +52,13 @@
          :cache? true
          :cache-path "target/lumo-test"}
 
+  :doo {:karma
+        {:launchers {:chromium-headless {:plugin "karma-chrome-launcher"
+                                         :name "ChromiumWithoutSandbox"}}
+         :config {"customLaunchers"
+                  {"ChromiumWithoutSandbox" {"base" "ChromiumHeadless"
+                                             "flags" ["--no-sandbox"]}}}}}
+
   :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.2"]
                                   [doo "0.1.8"]]}}
 
