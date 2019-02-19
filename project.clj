@@ -10,7 +10,7 @@
 
   :plugins [[lein-cljsbuild "1.1.7"]
             [lein-tach "0.4.0"]
-            [lein-doo "0.1.8"]]
+            [lein-doo "0.1.11"]]
 
   :cljsbuild {:builds
               [{:id "dev"
