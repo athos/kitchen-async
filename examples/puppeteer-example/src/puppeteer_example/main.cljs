@@ -1,27 +1,31 @@
 (ns puppeteer-example.main
-  (:require [kitchen-async.promise :as p]
-            puppeteer))
+  (:require [kitchen-async.promise :as p]))
 
-(defn main []
-  (p/let [browser (puppeteer/launch)
+(def puppeteer (js/require "puppeteer"))
+
+(defn -main []
+  (p/let [browser (.launch puppeteer)
           page (.newPage browser)]
-    (.goto page "https://www.google.com")
-    (.screenshot page #js{:path "screenshot.png"})
-    (.close browser)))
+    (p/try
+      (.goto page "https://clojure.org")
+      (.screenshot page #js{:path "screenshot.png"})
+      (p/catch :default e
+        (js/console.error e))
+      (p/finally
+        (.close browser)))))
 
 (comment
 
-  ;; Without kitchen-async, you have to write something like:
+  ;; Without kitchen-async, you'll have to write something like:
 
-  (defn main []
-    (-> (puppeteer/launch)
+  (defn -main [& args]
+    (-> (.launch puppeteer)
         (.then (fn [browser]
                  (-> (.newPage browser)
                      (.then (fn [page]
-                              (.then (.goto page "https://www.google.com")
-                                     #(.screenshot page #js{:path "screenshot.png"}))))
-                     (.then #(.close browser)))))))
+                              (-> (.goto page "https://clojure.org")
+                                  (.then #(.screenshot page #js{:path "screenshot.png"}))
+                                  (.catch js/console.error)
+                                  (.then #(.close browser))))))))))
 
   )
-
-(set! *main-cli-fn* main)

@@ -1,0 +1,6 @@
+{:paths ["src"]
+ :deps {org.clojure/clojurescript {:mvn/version "1.10.520"}
+        kitchen-async {:mvn/version "0.1.0-SNAPSHOT"}}
+ :aliases {:cljs {:main-opts ["-m" "cljs.main" "-re" "node"]}
+           :main {:main-opts ["-m" "cljs.main" "-re" "node"
+                              "-m" "puppeteer-example.main"]}}}
