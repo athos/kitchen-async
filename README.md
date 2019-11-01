@@ -17,13 +17,16 @@ kitchen-async focuses on the ease of Promise handling, and is not specifically i
 Assume you are writing some `Promise`-heavy async code in ClojureScript (e.g. [Google's Puppeteer](https://github.com/GoogleChrome/puppeteer) provides such a collection of APIs). Then, if you only use raw JavaScript interop facilities for it, you would have to write something like this:
 
 ```clj
-(-> (puppeteer/launch)
+(def puppeteer (js/require "puppeteer"))
+
+(-> (.launch puppeteer)
     (.then (fn [browser]
              (-> (.newPage browser)
                  (.then (fn [page]
-                          (.then (.goto page "https://www.google.com")
-                                 #(.screenshot page #js{:path "screenshot.png"}))))
-                 (.then #(.close browser))))))
+                          (-> (.goto page "https://clojure.org")
+                              (.then #(.screenshot page #js{:path "screenshot.png"}))
+                              (.catch js/console.error)
+                              (.then #(.close browser)))))))))
 ```
 
 `kitchen-async` provides more succinct, "direct style" syntactic sugar for those things, which you may find similar to `async/await` in ECMAScript 2017:
@@ -31,11 +34,17 @@ Assume you are writing some `Promise`-heavy async code in ClojureScript (e.g. [G
 ```clj
 (require '[kitchen-async.promise :as p])
 
-(p/let [browser (puppeteer/launch)
+(def puppeteer (js/require "puppeteer"))
+
+(p/let [browser (.launch puppeteer)
         page (.newPage browser)]
-  (.goto page "https://www.google.com")
-  (.screenshot page #js{:path "screenshot.png"})
-  (.close browser))
+  (p/try
+    (.goto page "https://clojure.org")
+    (.screenshot page #js{:path "screenshot.png"})
+    (p/catch :default e
+      (js/console.error e))
+    (p/finally
+      (.close browser))))
 ```
 
 ## Installation
