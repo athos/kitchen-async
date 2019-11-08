@@ -76,7 +76,10 @@
          (kitchen-async.promise/recur ~cond)))))
 
 (defn- interop? [form]
-  (and (symbol? form) (= (nth (name form) 0) \.)))
+  (and (symbol? form)
+       (cc/let [n (name form)]
+         (or (= (first n) \.)     ; member access
+             (= (last n) \.)))))  ; ctor call
 
 (defmacro -> [x & forms]
   (if forms

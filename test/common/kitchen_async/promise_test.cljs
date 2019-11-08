@@ -174,6 +174,8 @@
                   (is (= 2 @i))
                   (done))))))
 
+(defrecord R [x])
+
 (deftest ->-test
   (async done
     (p/then (p/-> (p/timeout 0 39)
@@ -192,6 +194,13 @@
               (is (= 42 x))
               (done)))))
 
+(deftest ->-with-ctor-call-test
+  (async done
+    (p/then (p/-> (p/timeout 0 42) R.)
+            (fn [r]
+              (is (= r (->R 42)))
+              (done)))))
+
 (deftest ->>-test
   (async done
     (p/then (p/->> (p/resolve 41)
@@ -208,6 +217,13 @@
                    (- 44))
             (fn [x]
               (is (= 42 x))
+              (done)))))
+
+(deftest ->>-with-ctor-call-test
+  (async done
+    (p/then (p/->> (p/timeout 0 42) R.)
+            (fn [r]
+              (is (= r (->R 42)))
               (done)))))
 
 (deftest some->-non-nil-test
@@ -238,6 +254,13 @@
               (is (= 42 x))
               (done)))))
 
+(deftest some->-with-ctor-call-test
+  (async done
+    (p/then (p/some-> (p/resolve 42) R.)
+            (fn [r]
+              (is (= r (->R 42)))
+              (done)))))
+
 (deftest some->>-non-nil-test
   (async done
     (p/then (p/some->> (p/resolve 1)
@@ -264,6 +287,13 @@
                        (- 44))
             (fn [x]
               (is (= 42 x))
+              (done)))))
+
+(deftest some->>-with-ctor-call-test
+  (async done
+    (p/then (p/some->> (p/resolve 42) R.)
+            (fn [r]
+              (is (= r (->R 42)))
               (done)))))
 
 (deftest try-success-test
